@@ -1,4 +1,4 @@
-# SolarSC-Core
+# SolarSCore
 C++ server core implemetation for old SC games using ARC4 encryption algorithm
 
 ## Usage:
