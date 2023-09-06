@@ -1,7 +1,7 @@
 #include <string>
 #include <cstring>
 #include <cstdlib>
-#include "include/arc4.h"
+#include "include/arc4.cpp"
 
 using namespace std;
 
@@ -19,7 +19,7 @@ public:
         memcpy(plainData, nonce.c_str(), nonce.length());
         memcpy(plainData + nonce.length(), data.c_str(), data.length());
 
-        RC4.setKey((const unsigned char*)key.c_str(), key.length());
+        RC4.setKey((unsigned char*)key.c_str(), key.length());
         RC4.encrypt(plainData, encr, nonce.length() + data.length());
 
         delete[] plainData;
@@ -34,7 +34,7 @@ public:
 
         memcpy(plainData, data.c_str(), data.length());
 
-        RC4.setKey((const unsigned char*)key.c_str(), key.length());
+        RC4.setKey((unsigned char*)key.c_str(), key.length());
         RC4.encrypt(plainData, decr, data.length());
 
         delete[] plainData;
