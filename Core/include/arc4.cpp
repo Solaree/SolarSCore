@@ -1,8 +1,4 @@
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "ARC4.h"
-#include <iostream>
+#include "arc4.h"
 
 using namespace std;
 
