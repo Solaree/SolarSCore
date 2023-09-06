@@ -1,4 +1,4 @@
-#include "../Server/KeepAliveOkMessage.cpp"
+#include "Server/KeepAliveOkMessage.cpp"
 
 class KeepAliveMessage {
 public:
