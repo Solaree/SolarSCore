@@ -7,9 +7,9 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include "Core/Crypto.cpp"
 #include "Stream/ByteStream"
 #include "Packets/LogicMagicMessageFactory.cpp"
-#include "Core/Crypto.cpp"
 
 using namespace std;
 
