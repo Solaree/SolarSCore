@@ -22,10 +22,10 @@ public:
         RC4.setKey((const unsigned char*)key.c_str(), key.length());
         RC4.encrypt(plainData, encr, nonce.length() + data.length());
 
-        free(encr);
         delete[] plainData;
 
         return encr;
+        free(encr);
     }
 
     char* decrypt(const string& data) {
@@ -37,9 +37,9 @@ public:
         RC4.setKey((const unsigned char*)key.c_str(), key.length());
         RC4.encrypt(plainData, decr, data.length());
 
-        free(decr);
         delete[] plainData;
 
         return decr;
+        free(decr);
     }
 };
