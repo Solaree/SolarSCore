@@ -23,8 +23,7 @@ public:
 	void writeBool(const bool val) {
 		if (val == true) {
 			writeUInt8(1);
-		}
-		else {
+		} else {
 			writeUInt8(0);
 		}
 	}
@@ -32,8 +31,7 @@ public:
 	bool readBool() {
 		if (readUInt8() == 1) {
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}
@@ -162,8 +160,7 @@ public:
 	void writeString(const string& s) {
 		if (s.empty()) {
 			writeInt(-1);
-		}
-		else {
+		} else {
 			writeInt(static_cast<int>(s.length()));
 			writeBytes(s.data());
 		}
@@ -184,8 +181,7 @@ public:
 	void writeStringRef(const string& s) {
 		if (s.empty()) {
 			writeInt(-1);
-		}
-		else {
+		} else {
 			writeLong(2, 0);
 			writeVInt(s.length());
 			writeBytes(s.data());
