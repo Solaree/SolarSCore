@@ -9,7 +9,7 @@ using namespace std;
 
 class ByteStream {
 public:
-	void writeUInt8(uint8_t val) {
+	void writeUInt8(const uint8_t val) {
 		ensureCapacity(1);
 
 		buffer.push_back((unsigned char)val);
@@ -23,7 +23,7 @@ public:
 		return byte;
 	}
 
-	void writeBool(bool val) {
+	void writeBool(const bool val) {
 		if (val == true) {
 			writeUInt8(1);
 		} else {
@@ -39,7 +39,7 @@ public:
 		}
 	}
 
-	void writeShort(short val) {
+	void writeShort(const short val) {
 		ensureCapacity(2);
 
 		for (int i = 1; i >= 0; i--) {
@@ -61,7 +61,7 @@ public:
 		return byte;
 	}
 
-	void writeInt(int val) {
+	void writeInt(const int val) {
 		ensureCapacity(4);
 
 		for (int i = 3; i >= 0; i--) {
@@ -82,7 +82,7 @@ public:
 		return byte;
 	}
 
-	void writeLong(int highByte, int lowByte) {
+	void writeLong(const int highByte, const int lowByte) {
 		writeInt(highByte);
 		writeInt(lowByte);
 	}
@@ -92,7 +92,7 @@ public:
 		readInt();
 	}
 
-	void writeVInt(int val) {
+	void writeVInt(const int val) {
 		bool rotation = true;
 
 		if (val == 0) {
@@ -148,13 +148,13 @@ public:
 		return result;
 	}
 
-	void writeArrayVInt(int val) {
+	void writeArrayVInt(const int val) {
 		for (int x : val) {
 			writeInt(x);
 		}
 	}
 
-	void writeLogicLong(int highByte, int lowByte) {
+	void writeLogicLong(const int highByte, const int lowByte) {
 		writeVInt(highByte);
 		writeVInt(lowByte);
 	}
@@ -168,7 +168,7 @@ public:
 		buffer.insert(buffer.end(), val, val + strlen(val));
 	}
 
-	void writeString(string s) {
+	void writeString(const string& s) {
 		if (s.empty()) {
 			writeInt(-1);
 		} else {
@@ -189,7 +189,7 @@ public:
 		return s;
 	}
 
-	void writeStringRef(string s) {
+	void writeStringRef(const string& s) {
 		if (s.empty()) {
 			writeInt(-1);
 		} else {
@@ -199,7 +199,7 @@ public:
 		}
 	}
 
-	void writeHexa(string hexa) {
+	void writeHexa(const string& hexa) {
 		if (!hexa.empty()) {
 			string hexString = hexa;
 
@@ -240,19 +240,19 @@ public:
 private:
 	vector<char> buffer;
 
-	void ensureCapacity(size_t capacity) {
+	void ensureCapacity(const size_t capacity) {
 		if (buffer.size() < capacity) {
 			buffer.resize(capacity);
 		}
 	}
 
-	void ensureBufferNotEmpty(size_t length) {
+	void ensureBufferNotEmpty(const size_t length) {
 		if (buffer.size() < length) {
 			cerr << "[*] Buffer is empty or invalid data to read" << endl;
 		}
 	}
 
-	vector<uint8_t> hexStringToBytes(string hexString) {
+	vector<uint8_t> hexStringToBytes(const string& hexString) {
 		vector<uint8_t> binaryData;
 
 		for (size_t i = 0; i < hexString.length(); i += 2) {
