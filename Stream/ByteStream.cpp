@@ -10,15 +10,12 @@ using namespace std;
 class ByteStream {
 public:
 	void writeUInt8(const uint8_t val) {
-		ensureCapacity(1);
-
 		buffer.push_back((unsigned char)val);
 	}
 
 	int readUInt8() {
-		ensureBufferNotEmpty(1);
-
 		uint8_t byte = buffer[0];
+
 		buffer.erase(buffer.begin());
 		return byte;
 	}
@@ -26,7 +23,8 @@ public:
 	void writeBool(const bool val) {
 		if (val == true) {
 			writeUInt8(1);
-		} else {
+		}
+		else {
 			writeUInt8(0);
 		}
 	}
@@ -34,14 +32,13 @@ public:
 	bool readBool() {
 		if (readUInt8() == 1) {
 			return true;
-		} else {
+		}
+		else {
 			return false;
 		}
 	}
 
 	void writeShort(const short val) {
-		ensureCapacity(2);
-
 		for (int i = 1; i >= 0; i--) {
 			short byte = (val >> (i * 8)) & 0xFF;
 			buffer.push_back(byte);
@@ -49,8 +46,6 @@ public:
 	}
 
 	short readShort() {
-		ensureBufferNotEmpty(2);
-
 		short byte = 0;
 
 		for (int i = 0; i < 2; i++) {
@@ -62,8 +57,6 @@ public:
 	}
 
 	void writeInt(const int val) {
-		ensureCapacity(4);
-
 		for (int i = 3; i >= 0; i--) {
 			int byte = (val >> (i * 8)) & 0xFF;
 			buffer.push_back(byte);
@@ -71,8 +64,6 @@ public:
 	}
 
 	int readInt() {
-		ensureBufferNotEmpty(4);
-
 		int byte = 0;
 
 		for (int i = 0; i < 4; i++) {
@@ -171,15 +162,16 @@ public:
 	void writeString(const string& s) {
 		if (s.empty()) {
 			writeInt(-1);
-		} else {
+		}
+		else {
 			writeInt(static_cast<int>(s.length()));
 			writeBytes(s.data());
 		}
 	}
 
 	string readString() {
-		int len = readInt();
 		string s;
+		int len = readInt();
 
 		if (len == -1 || len == 65535) {
 			return "";
@@ -192,7 +184,8 @@ public:
 	void writeStringRef(const string& s) {
 		if (s.empty()) {
 			writeInt(-1);
-		} else {
+		}
+		else {
 			writeLong(2, 0);
 			writeVInt(s.length());
 			writeBytes(s.data());
@@ -234,23 +227,11 @@ public:
 
 		send(sock, encrypted, strlen(encrypted), 0);
 
-		cout << "[*] Sent packet with Id: " << id << " || Length: " << dataStr  << " || Version: " <<  version << endl;
+		cout << "[*] Sent packet with Id: " << id << " || Length: " << dataStr << " || Version: " << version << endl;
 	}
 
 private:
 	vector<char> buffer;
-
-	void ensureCapacity(const size_t capacity) {
-		if (buffer.size() < capacity) {
-			buffer.resize(capacity);
-		}
-	}
-
-	void ensureBufferNotEmpty(const size_t length) {
-		if (buffer.size() < length) {
-			cerr << "[*] Buffer is empty or invalid data to read" << endl;
-		}
-	}
 
 	vector<uint8_t> hexStringToBytes(const string& hexString) {
 		vector<uint8_t> binaryData;
