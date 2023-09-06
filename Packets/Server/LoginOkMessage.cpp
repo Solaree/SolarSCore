@@ -5,8 +5,8 @@ public:
 	ByteStream Stream;
 
 	void encode(int sock) {
-        Stream.writeLong(0, 1); // AccountID
-        Stream.writeLong(0, 1); // HomeID
+        Stream.writeLogicLong(0, 1); // AccountID
+        Stream.writeLogicLong(0, 1); // HomeID
 
         Stream.writeString("Solar"); // PassToken
         Stream.writeString(); // FacebookID
