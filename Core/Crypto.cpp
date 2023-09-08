@@ -16,31 +16,20 @@ ARC4 RC4;
 string key = "fhsd6f86f67rt8fw78fw789we78r9789wer6re";
 string nonce = "nonce";
 
-char* Crypto::encrypt(string& data) {
-	unsigned char* plainData = new unsigned char[nonce.length() + data.length()];
+string Crypto::encrypt(string& data) {
+    string plainData(nonce + data);
 
-	memcpy(plainData, nonce.c_str(), nonce.length());
-	memcpy(plainData + nonce.length(), data.c_str(), data.length());
+    RC4.setKey((unsigned char*)key.c_str(), key.length());
+    RC4.encrypt((unsigned char*)plainData.c_str(), (unsigned char*)plainData.c_str(), plainData.length());
 
-	RC4.setKey((unsigned char*)key.c_str(), key.length());
-	RC4.encrypt(plainData, plainData, nonce.length() + data.length());
-
-	string encrypted(*plainData);
-
-	return encrypted;
-	delete[] plainData;
+    return plainData;
 }
 
-char* Crypto::decrypt(string& data) {
-	unsigned char* plainData = new unsigned char[data.length()];
+string Crypto::decrypt(string& data) {
+    string plainData(data);
 
-	memcpy(plainData, data.c_str(), data.length());
+    RC4.setKey((unsigned char*)key.c_str(), key.length());
+    RC4.encrypt((unsigned char*)plainData.c_str(), (unsigned char*)plainData.c_str(), plainData.length());
 
-	RC4.setKey((unsigned char*)key.c_str(), key.length());
-	RC4.encrypt(plainData, plainData, data.length());
-
-	string decrypted(*plainData);
-
-	return decrypted;
-	delete[] plainData;
+    return plainData;
 }
