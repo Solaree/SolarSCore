@@ -49,8 +49,8 @@ bool ByteStream::readBool() {
 
 void ByteStream::writeShort(short val) {
 	for (size_t i = 1; i >= 0; i--) {
-		short byte = (val >> (i * 8)) & 0xFF;
-		buffer.push_back(byte);
+		short word = (val >> (i * 8)) & 0xFF;
+		buffer.push_back(word);
 	}
 }
 
@@ -58,43 +58,43 @@ short ByteStream::readShort() {
 	short byte = 0;
 
 	for (size_t i = 0; i <= 1; i++) {
-		byte |= (buffer[0] << (8 * (1 - i)));
+		word |= (buffer[0] << (8 * (1 - i)));
 		buffer.erase(buffer.begin());
 	}
-	return byte;
+	return word;
 }
 
 short ByteStream::readLen() {
 	int byte = 0;
 
 	for (size_t i = 0; i <= 2; i++) {
-		byte |= (buffer[0] << (8 * (2 - i)));
+		word |= (buffer[0] << (8 * (2 - i)));
 		buffer.erase(buffer.begin());
 	}
-	return byte;
+	return word;
 }
 
 void ByteStream::writeInt(int val) {
 	for (size_t i = 3; i >= 0; i--) {
-		int byte = (val >> (i * 8)) & 0xFF;
-		buffer.push_back(byte);
+		int dword = (val >> (i * 8)) & 0xFF;
+		buffer.push_back(dword);
 	}
 }
 
 int ByteStream::readInt() {
-	int byte = 0;
+	int dword = 0;
 
 	for (size_t i = 0; i <= 3; i++) {
-		byte |= (buffer[0] << (8 * (3 - i)));
+		dword |= (buffer[0] << (8 * (3 - i)));
 		buffer.erase(buffer.begin());
 	}
-	return byte;
+	return dword;
 }
 
 void ByteStream::writeIntLittleEndian(int val) {
 	for (size_t i = 0; i <= 3; i++) {
-		int byte = (val >> (i * 8)) & 0xFF;
-		buffer.push_back(byte);
+		int dword = (val >> (i * 8)) & 0xFF;
+		buffer.push_back(dword);
 	}
 }
 
@@ -102,10 +102,10 @@ int ByteStream::readIntLittleEndian() {
 	int byte = 0;
 
 	for (size_t i = 0; i <= 3; i++) {
-		byte |= (buffer[0] << (8 * i));
+		dword |= (buffer[0] << (8 * i));
 		buffer.erase(buffer.begin());
 	}
-	return byte;
+	return dword;
 }
 
 void ByteStream::writeLong(int highByte, int lowByte) {
@@ -113,9 +113,14 @@ void ByteStream::writeLong(int highByte, int lowByte) {
 	writeInt(lowByte);
 }
 
-long ByteStream::readLong() {
-	readInt();
-	readInt();
+long long ByteStream::readLong() {
+ long long qword = 0;
+
+	for (size_t i = 0; i <= 7; i++) {
+		qword |= (buffer[0] << (8 * (7 - i)));
+		buffer.erase(buffer.begin());
+	}
+ return qword;
 }
 
 void ByteStream::writeVInt(int val) {
@@ -185,7 +190,7 @@ void ByteStream::writeLogicLong(int highByte, int lowByte) {
 	writeVInt(lowByte);
 }
 
-long ByteStream::readLogicLong() {
+long long ByteStream::readLogicLong() {
 	readVInt();
 	readVInt();
 }
