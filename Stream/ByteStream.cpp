@@ -8,7 +8,6 @@
 #include <string>
 #include <iomanip>
 #include <iostream>
-#include <Windows.h>
 #include <WinSock2.h>
 #include "../include/Core/Crypto.hpp"
 #include "../include/Stream/ByteStream.hpp"
