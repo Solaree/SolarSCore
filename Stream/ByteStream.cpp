@@ -252,12 +252,12 @@ void ByteStream::packetWrite(int id, int sock, int version = 0) {
     vector<char> packetVer(2);
 
     packet.resize(buffer.size());
-	memcpy(packet.data(), buffer.data(), buffer.size());
+    memcpy(packet.data(), buffer.data(), buffer.size());
 
-	buffer.clear();
+    buffer.clear();
 
-	string dataStr(packet.begin(), packet.end());
-	vector<char> encrypted = RC4Encrypt(dataStr.begin(), dataStr.end());
+    string dataStr(packet.begin(), packet.end());
+    vector<char> encrypted = RC4Encrypt(dataStr.begin(), dataStr.end());
 
     packetId[0] = ((char)(id >> 8) & 0xFF);
     packetId[1] = ((char)id & 0xFF);
