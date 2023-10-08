@@ -1,22 +1,14 @@
-#include "../include/Packets/Client/KeepAliveMessage.hpp"
-#include "../include/Packets/Server/KeepAliveOkMessage.hpp"
+#include "include/Packets/Client/KeepAliveMessage.hpp"
 
-char buffer[256];
-KeepAliveOkMessage KeepAliveOk;
-
-void KeepAliveMessage::KeepAliveMessage(int sock) {
+KeepAliveMessage::KeepAliveMessage(int32_t sock) {
 	decode(sock);
-	KeepAliveOk.encode(sock);
+	KeepAliveOkMessage::encode(sock);
 }
 
-void KeepAliveMessage::decode(int sock) {
-	process(sock);
-}
-
-void process(int sock) {
+void KeepAliveMessage::decode(int32_t sock) {
 	/* ... */
 }
 
-short KeepAliveMessage::getMessageType() {
+const uint16_t KeepAliveMessage::getMessageType() {
 	return 10108;
 }

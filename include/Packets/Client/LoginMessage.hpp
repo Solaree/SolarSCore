@@ -1,14 +1,17 @@
 #ifndef LOGINMESSAGE_HPP
 #define LOGINMESSAGE_HPP
-#include <string>
 
-using namespace std;
+#include "include/Stream/ByteStream.hpp"
+#include "include/Packets/Server/LoginOkMessage.hpp"
+#include "include/Packets/Server/LoginFailedMessage.hpp"
 
 class LoginMessage {
 public:
-	void LoginMessage(int sock); /* Message init */
-	void decode(int sock); /* Message decoding */
-	short getMessageType() /* Message Id */
+	static char buffer[256]; /* Main buffer */
+
+	LoginMessage(int32_t sock); /* Message init */
+	static void decode(int32_t sock); /* Message decoding */
+	static const uint16_t getMessageType(); /* Message Id */
 };
 
 #endif // !LOGINMESSAGE_HPP

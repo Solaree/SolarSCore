@@ -1,11 +1,13 @@
 #ifndef KEEPALIVEMESSAGE_HPP
-#define KEEPALIVEMESSAGE_HPPs
+#define KEEPALIVEMESSAGE_HPP
+
+#include "include/Packets/Server/KeepAliveOkMessage.hpp"
 
 class KeepAliveMessage {
 public:
-	void KeepAliveMessage(int sock); /* Message init */
-	void decode(int sock); /* Message decoding */
-	short getMessageType(); /* Message Id */
+	KeepAliveMessage(int32_t sock); /* Message init */
+	static void decode(int32_t sock); /* Message decoding */
+	static const uint16_t getMessageType(); /* Message Id */
 };
 
 #endif // !KEEPALIVEMESSAGE_HPP

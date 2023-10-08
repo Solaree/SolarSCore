@@ -1,37 +1,29 @@
-#include <string>
-#include <iostream>
-#include "../include/Stream/ByteStream.hpp"
-#include "../include/Packets/Client/ClientHelloMessage.hpp"
-#include "../include/Packets/Server/ServerHelloMessage.hpp"
+#include "include/Packets/Client/ClientHelloMessage.hpp"
 
-using namespace std;
+char ClientHelloMessage::buffer[256];
 
-char buffer[256];
-ByteStream Stream;
-ServerHelloMessage ServerHello;
-
-void ClientHelloMessage::ClientHelloMessage(int sock) {
+ClientHelloMessage::ClientHelloMessage(int32_t sock) {
 	decode(sock);
-	ServerHello.encode(sock);
+	ServerHelloMessage::encode(sock);
 }
 
-void decode(int sock) {
-	int Protocol = Stream.readInt();
-	int KeyVersion = Stream.readInt();
-	int MajorVersion = Stream.readInt();
-	int BuildVersion = Stream.readInt();
-	int ContentVersion = Stream.readInt();
+void ClientHelloMessage::decode(int32_t sock) {
+	Stream.buffer.insert(Stream.buffer.end(), begin(buffer), end(buffer));
+
+	int32_t Protocol = Stream.readInt();
+	int32_t KeyVersion = Stream.readInt();
+	int32_t MajorVersion = Stream.readInt();
+	int32_t BuildVersion = Stream.readInt();
+	int32_t ContentVersion = Stream.readInt();
+
 	string ResourceSha = Stream.readString();
-	int Device = Stream.readInt();
-	int Store = Stream.readInt();
 
-	process(sock, Protocol, KeyVersion, MajorVersion, BuildVersion, ContentVersion, ResourceSha, Device, Store);
+	int32_t Device = Stream.readInt();
+	int32_t Store = Stream.readInt();
+
+	cout << "[*] Received Session Data:" << endl << "Protocol: " << Protocol << endl << "KeyVersion: " << KeyVersion << endl << "GameVersion: " << MajorVersion << "." << ContentVersion << "." << BuildVersion << endl << "ResourceSha: " << ResourceSha.c_str() << endl << "Device: " << Device << endl << "Store: " << Store << endl;
 }
 
-void process(int sock, int Protocol, int KeyVersion, int MajorVersion, int BuildVersion, int ContentVersion, const string& ResourceSha, int Device, int Store) {
-	cout << "[*] Received Session Data:" << endl << "Protocol: " << Protocol << endl << "KeyVersion: " << KeyVersion << endl << "GameVersion: " << MajorVersion << "." << ContentVersion << "." << BuildVersion << endl << "ResourceSha: " << ResourceSha << endl << "Device: " << Device << endl << "Store: " << Store << endl;
-}
-
-short getMessageType() {
+const uint16_t ClientHelloMessage::getMessageType() {
 	return 10100;
 }

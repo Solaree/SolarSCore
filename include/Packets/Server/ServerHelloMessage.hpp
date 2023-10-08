@@ -1,11 +1,13 @@
 #ifndef SERVERHELLOMESSAGE_HPP
 #define SERVERHELLOMESSAGE_HPP
 
+#include "include/Stream/ByteStream.hpp"
+
 class ServerHelloMessage {
 public:
-	void ServerHelloMessage(int sock);  /* Message init */
-	void encode(int sock);  /* Message encoding */
-	short getMessageType(); /* Message Id */
+	ServerHelloMessage(int32_t sock);  /* Message init */
+	static void encode(int32_t sock);  /* Message encoding */
+	static const uint16_t getMessageType(); /* Message Id */
 };
 
 #endif // !SERVERHELLOMESSAGE_HPP

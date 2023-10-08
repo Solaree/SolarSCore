@@ -3,25 +3,13 @@
 * https://github.com/Solaree *
 */
 
-#pragma once
-#include <vector>
-#include <string>
-#include <iomanip>
-#include <iostream>
-#include <WinSock2.h>
-#include "../include/Core/Crypto.hpp"
-#include "../include/Stream/ByteStream.hpp"
-
-using namespace std;
-
-vector<char> buffer;
+#include "include/Stream/ByteStream.hpp"
 
 void ByteStream::writeUInt8(uint8_t val) {
-	unsigned char byte = (unsigned char)val;
-	buffer.push_back(byte);
+	buffer.push_back(val);
 }
 
-int ByteStream::readUInt8() {
+uint8_t ByteStream::readUInt8() {
 	uint8_t byte = buffer[0];
 
 	buffer.erase(buffer.begin());
@@ -29,7 +17,7 @@ int ByteStream::readUInt8() {
 }
 
 void ByteStream::writeBool(bool val) {
-	int bitPosition = buffer.size() % 8;
+	int32_t bitPosition = buffer.size() % 8;
 
 	if (bitPosition == 0) {
 		buffer.push_back(0);
@@ -46,83 +34,79 @@ bool ByteStream::readBool() {
 	}
 }
 
-void ByteStream::writeShort(short val) {
-	for (size_t i = 1; i >= 0; i--) {
-		short word = (val >> (i * 8)) & 0xFF;
-		buffer.push_back(word);
+void ByteStream::writeShort(int16_t val) {
+	for (int16_t i = 1; i >= 0; i--) {
+		int16_t byte = (val >> (i * 8)) & 0xFF;
+		buffer.push_back(byte);
 	}
 }
 
-short ByteStream::readShort() {
-	short byte = 0;
+int16_t ByteStream::readShort() {
+	int16_t byte = 0;
 
-	for (size_t i = 0; i <= 1; i++) {
-		word |= (buffer[0] << (8 * (1 - i)));
+	for (int16_t i = 0; i <= 1; i++) {
+		byte |= (buffer[0] << (8 * (1 - i)));
 		buffer.erase(buffer.begin());
 	}
-	return word;
+	return byte;
 }
 
-short ByteStream::readLen() {
-	int byte = 0;
+int16_t ByteStream::readLen() {
+	int16_t byte = 0;
 
-	for (size_t i = 0; i <= 2; i++) {
-		word |= (buffer[0] << (8 * (2 - i)));
+	for (int16_t i = 0; i <= 2; i++) {
+		byte |= (buffer[0] << (8 * (2 - i)));
 		buffer.erase(buffer.begin());
 	}
-	return word;
+	return byte;
 }
 
-void ByteStream::writeInt(int val) {
-	for (size_t i = 3; i >= 0; i--) {
-		int dword = (val >> (i * 8)) & 0xFF;
-		buffer.push_back(dword);
+void ByteStream::writeInt(int32_t val) {
+	for (int32_t i = 3; i >= 0; i--) {
+		int32_t byte = (val >> (i * 8)) & 0xFF;
+		buffer.push_back(byte);
 	}
 }
 
-int ByteStream::readInt() {
-	int dword = 0;
+int32_t ByteStream::readInt() {
+	int32_t byte = 0;
 
-	for (size_t i = 0; i <= 3; i++) {
-		dword |= (buffer[0] << (8 * (3 - i)));
+	for (int32_t i = 0; i <= 3; i++) {
+		byte |= (buffer[0] << (8 * (3 - i)));
 		buffer.erase(buffer.begin());
 	}
-	return dword;
+	return byte;
 }
 
-void ByteStream::writeIntLittleEndian(int val) {
-	for (size_t i = 0; i <= 3; i++) {
-		int dword = (val >> (i * 8)) & 0xFF;
-		buffer.push_back(dword);
+void ByteStream::writeIntLittleEndian(int32_t val) {
+	for (int32_t i = 0; i <= 3; i++) {
+		int32_t byte = (val >> (i * 8)) & 0xFF;
+		buffer.push_back(byte);
 	}
 }
 
-int ByteStream::readIntLittleEndian() {
-	int byte = 0;
+int32_t ByteStream::readIntLittleEndian() {
+	int32_t byte = 0;
 
-	for (size_t i = 0; i <= 3; i++) {
-		dword |= (buffer[0] << (8 * i));
+	for (int32_t i = 0; i <= 3; i++) {
+		byte |= (buffer[0] << (8 * i));
 		buffer.erase(buffer.begin());
 	}
-	return dword;
+	return byte;
 }
 
-void ByteStream::writeLong(int highByte, int lowByte) {
+void ByteStream::writeLong(int32_t highByte, int32_t lowByte) {
 	writeInt(highByte);
 	writeInt(lowByte);
 }
 
-long long ByteStream::readLong() {
- long long qword = 0;
-
-	for (size_t i = 0; i <= 7; i++) {
-		qword |= (buffer[0] << (8 * (7 - i)));
-		buffer.erase(buffer.begin());
-	}
- return qword;
+pair<int32_t, int32_t> ByteStream::readLong() {
+    int32_t hiWord = readInt();
+    int32_t loWord = readInt();
+    return make_pair(hiWord, loWord);
 }
 
-void ByteStream::writeVInt(int val) {
+void ByteStream::writeVInt(int32_t val) {
 	bool rotation = true;
 
 	if (val == 0) {
@@ -133,31 +117,32 @@ void ByteStream::writeVInt(int val) {
 	val = (val << 1) ^ (val >> 31);
 
 	while (val) {
-		int tmp = i & 0x7f;
+		int32_t tmp = val & 0x7F;
 
 		if (val >= 0x80) {
 			tmp |= 0x80;
 		} if (rotation == true) {
 			rotation = false;
 
-			int l = tmp & 0x1;
-			int byte = (tmp & 0x80) >> 7;
+			int32_t l = tmp & 0x1;
+			int32_t byte = (tmp & 0x80) >> 7;
 
 			tmp >>= 1;
 			tmp = tmp & ~0xC0;
 			tmp = tmp | (byte << 7) | (l << 6);
 		}
-		buffer.push_back(tmp & 0xFF); val >>= 7;
+		buffer.push_back(tmp & 0xFF);
+		val >>= 7;
 	}
 }
 
-int ByteStream::readVInt() {
-	int result = 0;
-	int shift = 0;
-	int rotation, msb, seven_bit;
+int32_t ByteStream::readVInt() {
+	int32_t result = 0;
+	int32_t shift = 0;
+	int32_t rotation, msb, seven_bit;
 
 	while (true) {
-		int byte = readInt(1);
+		int32_t byte = readInt();
 
 		if (shift == 0) {
 			seven_bit = (byte & 0x40) >> 6;
@@ -178,48 +163,51 @@ int ByteStream::readVInt() {
 	return result;
 }
 
-void ByteStream::writeArrayVInt(int val) {
-	for (size_t x : val) {
-		writeInt(x);
-	}
+void ByteStream::writeArrayVInt(int32_t* val, int32_t count) {
+    for (int32_t i = 0; i < count; ++i) {
+        writeVInt(val[i]);
+    }
 }
 
-void ByteStream::writeLogicLong(int highByte, int lowByte) {
+void ByteStream::writeLogicLong(int32_t highByte, int32_t lowByte) {
 	writeVInt(highByte);
 	writeVInt(lowByte);
 }
 
-long long ByteStream::readLogicLong() {
-	readVInt();
-	readVInt();
+pair<int32_t, int32_t> ByteStream::readLogicLong() {
+    int32_t hiWord = readVInt();
+    int32_t loWord = readVInt();
+    return make_pair(hiWord, loWord);
 }
 
-void ByteStream::writeBytes(string val) {
-	if (val.empty()) {
-		writeInt(-1);
-	} else {
-		buffer.insert(buffer.end(), val, val + strlen(val));
-	}
+void ByteStream::writeBytes(const string& val) {
+    if (val.empty()) {
+        writeInt(-1);
+    } else {
+        for (uint8_t c : val) {
+            writeUInt8(c);
+        }
+    }
 }
 
 void ByteStream::writeString(string s) {
 	if (s.empty()) {
 		writeInt(-1);
 	} else {
-		writeInt((int)s.length());
+		writeInt((int32_t)s.length());
 		writeBytes(s.data());
 	}
 }
 
 string ByteStream::readString() {
-	int len = readInt();
+	int32_t len = readInt();
 
 	if (len == -1 || len == 65535) {
 		return "";
 	}
-	string s(buffer.begin(), buffer.begin() + len);
+	string str(buffer.begin(), buffer.begin() + len);
 	buffer.erase(buffer.begin(), buffer.begin() + len);
-	return s;
+	return str;
 }
 
 void ByteStream::writeStringRef(string s) {
@@ -247,19 +235,19 @@ void ByteStream::writeHex(string hexa) {
 	}
 }
 
-vector<uint8_t> hexStringToBytes(const string& hexString) {
+vector<uint8_t> ByteStream::hexStringToBytes(const string& hexString) {
 	vector<uint8_t> binaryData;
 
 	for (size_t i = 0; i < hexString.length(); i += 2) {
 		string byteString = hexString.substr(i, 2);
 
-		uint8_t byte = static_cast<uint8_t>(stoul(byteString, nullptr, 16));
+		uint8_t byte = (uint8_t)(stoul(byteString, nullptr, 16));
 		binaryData.push_back(byte);
 	}
 	return binaryData;
 }
 
-void ByteStream::writePacket(int id, int sock, int version = 0) {
+void ByteStream::writePacket(int32_t id, int32_t sock, int32_t version /* = 0 */) {
 	vector<char> packet;
 	char header[7];
 
@@ -268,29 +256,33 @@ void ByteStream::writePacket(int id, int sock, int version = 0) {
 	buffer.clear();
 
 	string data(packet.begin(), packet.end());
-	string encrypted = RC4Encrypt(data);
+	string encrypted = Crypto::encrypt(data);
 
-	for (size_t i = 0; i < 2; i++) {
+	for (int32_t i = 0; i < 2; i++) {
 		header[i] = (char)((id >> (8 * (1 - i))) & 0xFF);
 	} // Short id
 
-	for (size_t i = 2; i < 5; i++) {
+	for (int32_t i = 2; i < 5; i++) {
 		header[i] = (char)((encrypted.size() >> (8 * (4 - i))) & 0xFF);
 	} // 3-bytes length
 
-	for (size_t i = 5; i < 7; i++) {
-		header[i] = (char)((version >> (8 * (3 - i))) & 0xFF);
-	} // Short version
+	if (version != 0) {
+		for (int32_t i = 5; i < 7; i++) {
+			header[i] = (char)((version >> (8 * (3 - i))) & 0xFF);
+		} // Short version
+	}
 
 	string finalHeader(header, 7);
 	string finalPacket = finalHeader + encrypted;
 
-	send(sock, finalPacket, finalPacket.size(), 0);
+	send(sock, finalPacket.c_str(), finalPacket.size(), 0);
 
 	cout << "[*] Sent packet with Id: " << id << " || Length: " << finalPacket.size() << " || Version: " << version << " || Content: " << "b\"";
 
 	for (size_t i = 0; i < finalPacket.size(); ++i) {
-		cout << "\\x" << uppercase << hex << setw(2) << setfill('0') << ((int)finalPacket[i] & 0xFF);
+		cout << "\\x" << uppercase << hex << setw(2) << setfill('0') << ((size_t)finalPacket[i] & 0xFF);
 	}
 	cout << "\"" << dec << endl << endl;
 }
+
+ByteStream Stream;

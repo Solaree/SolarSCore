@@ -1,14 +1,11 @@
-#include "../include/Stream/ByteStream.hpp"
-#include "../include/Packets/Server/LoginOkMessage.hpp"
+#include "include/Packets/Server/LoginOkMessage.hpp"
 
-ByteStream Stream;
-
-void LoginOkMessage::LoginOkMessage(int sock) {
-	encode();
-	Stream.writePacket(getMessageType, sock);
+LoginOkMessage::LoginOkMessage(int32_t sock) {
+	encode(sock);
+	Stream.writePacket(getMessageType(), sock);
 }
 
-void LoginOkMessage::encode(int sock) {
+void LoginOkMessage::encode(int32_t sock) {
 	Stream.writeLogicLong(0, 1); // AccountID
 	Stream.writeLogicLong(0, 1); // HomeID
 
@@ -35,6 +32,6 @@ void LoginOkMessage::encode(int sock) {
 	Stream.writeString(); // GoogleServiceID
 }
 
-short LoginOkMessage::getMessageType() {
+const uint16_t LoginOkMessage::getMessageType() {
 	return 20108;
 }

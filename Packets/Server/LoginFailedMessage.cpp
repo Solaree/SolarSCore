@@ -1,28 +1,22 @@
-#include <string>
-#include "../include/Stream/ByteStream.hpp"
-#include "../include/Packets/Server/LoginFailedMessage.hpp"
+#include "include/Packets/Server/LoginFailedMessage.hpp"
 
-using namespace std;
-
-ByteStream Stream;
-
-void LoginFailedMessage::LoginFailedMessage(int sock) {
-	encode();
-	Stream.writePacket(getMessageType, sock);
+LoginFailedMessage::LoginFailedMessage(int32_t sock) {
+	encode(sock);
+	Stream.writePacket(getMessageType(), sock);
 }
 
-void LoginFailedMessage::encode(int sock, string error) {
+void LoginFailedMessage::encode(int32_t sock /* , string error */) {
 	Stream.writeVInt(0); // Error Code
 
 	Stream.writeString();
 	Stream.writeString();
 	Stream.writeString(); // Patch Url
 	Stream.writeString(); // Update Url
-	Stream.writeString(error); // Error Message
+	Stream.writeString("Connection failed"); // Error Message
 
 	Stream.writeVInt(0);
 }
 
-short LoginFailedMessage::getMessageType() {
+const uint16_t LoginFailedMessage::getMessageType() {
 	return 20103;
 }

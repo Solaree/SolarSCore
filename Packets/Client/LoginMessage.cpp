@@ -1,43 +1,29 @@
-#include <string>
-#include <iostream>
-#include "../include/Stream/ByteStream.hpp"
-#include "../include/Packets/Client/LoginMessage.hpp"
-#include "../include/Packets/Server/LoginOkMessage.hpp"
-#include "../include/Packets/Server/LoginFailedMessage.hpp"
+#include "include/Packets/Client/LoginMessage.hpp"
 
-char buffer[256];
-ByteStream Stream;
-LoginOkMessage LoginOk;
-LoginFailedMessage LoginFailed;
+char LoginMessage::buffer[256];
 
-using namespace std;
-
-void LoginMessage::LoginMessage(int sock) {
+LoginMessage::LoginMessage(int32_t sock) {
 	decode(sock);
-	LoginOk.encode(sock);
+	LoginOkMessage::encode(sock);
 }
 
-void LoginMessage::decode(int sock) {
-	Stream.buffer.insert(Stream.buffer.end(), begin(buffer), end(buffer);
+void LoginMessage::decode(int32_t sock) {
+	Stream.buffer.insert(Stream.buffer.end(), begin(buffer), end(buffer));
 
-	int HighId = Stream.readInt();
-	int LowId = Stream.readInt();
+	int32_t HighId = Stream.readInt();
+	int32_t LowId = Stream.readInt();
 
 	string Token = Stream.readString();
 
-	int MajorVersion = Stream.readInt();
-	int ContentVersion = Stream.readInt();
-	int BuildVersion = Stream.readInt();
+	int32_t MajorVersion = Stream.readInt();
+	int32_t ContentVersion = Stream.readInt();
+	int32_t BuildVersion = Stream.readInt();
 
 	string ResourceSha = Stream.readString();
 
-	process(sock, HighId, LowId, Token, MajorVersion, ContentVersion, BuildVersion, ResourceSha);
+	cout << "[*] Received Authentication Data:" << endl << "HighId: " << HighId << endl << "LowId: " << LowId << endl << "Token: " << Token.c_str() << "GameVersion: " << MajorVersion << "." << ContentVersion << "." << BuildVersion << endl << "ResourceSha: " << ResourceSha.c_str() << endl;
 }
 
-void process(int sock, int HighId, int LowId, const string& Token, int MajorVersion, int ContentVersion, int BuildVersion, const string& ResourceSha) {
-	cout << "[*] Received Authentication Data:" << endl << "HighId: " << HighId << endl << "LowId: " << LowId << endl << "Token: " << Token << "GameVersion: " << MajorVersion << "." << ContentVersion << "." << BuildVersion << endl << "ResourceSha: " << ResourceSha << endl;
-}
-
-short LoginMessage::getMessageType() {
+const uint16_t LoginMessage::getMessageType() {
 	return 10101;
 }

@@ -3,20 +3,15 @@
 * https://github.com/Solaree *
 */
 
-#include <string>
-#include <cstring>
-#include <cstdlib>
-#include "../include/arc4.h"
-#include "../include/Core/Crypto.hpp"
-
-using namespace std;
+#include "Core/arc4/arc4.hpp"
+#include "include/Core/Crypto.hpp"
 
 ARC4 RC4;
 
 string key = "fhsd6f86f67rt8fw78fw789we78r9789wer6re";
 string nonce = "nonce";
 
-string Crypto::encrypt(string& data) {
+string Crypto::encrypt(const string& data) {
     string plainData(nonce + data);
 
     RC4.setKey((unsigned char*)key.c_str(), key.length());
@@ -25,7 +20,7 @@ string Crypto::encrypt(string& data) {
     return plainData;
 }
 
-string Crypto::decrypt(string& data) {
+string Crypto::decrypt(const string& data) {
     string plainData(data);
 
     RC4.setKey((unsigned char*)key.c_str(), key.length());

@@ -1,17 +1,14 @@
-#include "../include/Stream/ByteStream.hpp"
-#include "../include/Packets/Server/KeepAliveOkMessage.hpp"
+#include "include/Packets/Server/KeepAliveOkMessage.hpp"
 
-ByteStream Stream;
-
-void KeepAliveOkMessage::KeepAliveOkMessage(int sock) {
-	encode();
-	Stream.writePacket(getMessageType, sock);
+KeepAliveOkMessage::KeepAliveOkMessage(int32_t sock) {
+	encode(sock);
+	Stream.writePacket(getMessageType(), sock);
 }
 
-void KeepAliveOkMessage::encode(int sock) {
+void KeepAliveOkMessage::encode(int32_t sock) {
 	/* ... */
 }
 
-short KeepAliveOkMessage::getMessageType() {
+const uint16_t KeepAliveOkMessage::getMessageType() {
 	return 20108;
 }

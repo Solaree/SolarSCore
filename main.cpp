@@ -1,28 +1,26 @@
-#include <iostream>
+#include <ifaddrs.h>
+
 #include <thread>
-#include <WinSock2.h>
-#include "../include/Core/Crypto.hpp"
-#include "../include/Stream/ByteStream.hpp"
-#include "../include/Packets/LogicScrollMessageFactory.hpp"
 
-using namespace std;
+#include "include/Core/Crypto.hpp"
+#include "include/Stream/ByteStream.hpp"
+#include "include/Packets/LogicScrollMessageFactory.hpp"
 
-void exec(SOCKET client) {
+void exec(int clientSocket) {
     LogicScrollMessageFactory LogicMessageFactory;
-    LogicMessageFactory.sock = client;
-    ByteStream Stream;
+    LogicMessageFactory.sock = clientSocket;
 
     while (true) {
         Stream.buffer.resize(7);
 
-        string header(Stream.buffer.data());
-        char* decrypted = RC4Decrypt(header);
-        string decryptedStr(*decrypted);
+        string header((const char*)Stream.buffer.data(), 7);
+        string decryptedStr = Crypto::decrypt(header);
+        const char *decrypted = decryptedStr.c_str();
 
-        if (recv(client, decrypted, 7, 0) > 0) {
-            unsigned short packetId = Stream.readShort();
-            unsigned short packetLen = Stream.readLen();
-            unsigned short packetVer = Stream.readShort();
+        if (recv(clientSocket, (char*)decrypted, 7, 0) > 0) {
+            uint16_t packetId = Stream.readShort();
+            uint16_t packetLen = Stream.readLen();
+            uint16_t packetVer = Stream.readShort();
 
             cout << "[*] Got packet with Id: " << packetId << " || Length: " << packetLen << " || Version: " << packetVer << " || Content: " << "b\"";
 
@@ -31,15 +29,11 @@ void exec(SOCKET client) {
             }
             cout << "\"" << dec << endl << endl;
 
-            char* buffer = new char[packetLen];
-
-            if (recv(client, buffer, packetLen, 0) == packetLen) {
-                memcpy(LogicMessageFactory.buffer, buffer, packetLen);
+            if (recv(clientSocket, Stream.buffer.data(), packetLen, 0)) {
+                memcpy(LogicMessageFactory.buffer, Stream.buffer.data(), packetLen);
 
                 LogicMessageFactory.createMessageByType(packetId);
                 memset(LogicMessageFactory.buffer, 0, 512);
-
-                delete[] buffer;
                 Stream.buffer.clear();
             }
         }
@@ -47,51 +41,71 @@ void exec(SOCKET client) {
     }
 }
 
-int main() {
-    int sockopt = 1;
-    int port = 9339;
-    WSADATA wsaData;
+void getipinfo() {
+    struct ifaddrs *ifaddr, *ifa;
 
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        cerr << "[*] Failed to initialize Winsock" << endl;
-        return 1;
+    getifaddrs(&ifaddr);
+
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == NULL)
+            continue;
+
+        int family = ifa->ifa_addr->sa_family;
+
+        if (family == AF_INET) { // Check for IPv4 address
+            char ipAddr[INET_ADDRSTRLEN];
+            struct sockaddr_in *addr = (struct sockaddr_in*)ifa->ifa_addr;
+
+            inet_ntop(AF_INET, &(addr->sin_addr), ipAddr, INET_ADDRSTRLEN);
+
+            if (strncmp(ipAddr, "192.168.", 7) == 0)
+                cout << "[*] Local IP Address: " << ipAddr << endl;
+        }
     }
+    freeifaddrs(ifaddr);
+}
 
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
-    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&sockopt, sizeof(int));
+int32_t main() {
+    int32_t sockopt = 1;
+    int32_t port = 9339;
+
+    int32_t serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &sockopt, sizeof(int32_t));
 
     sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = INADDR_ANY;
     serverAddr.sin_port = htons(port);
 
-    if (bind(sock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+    if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
         cerr << "[*] Failed to bind socket" << endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    if (listen(sock, 1) == SOCKET_ERROR) {
+    if (listen(serverSocket, 1) == -1) {
         cerr << "[*] Listen failed" << endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    cout << "[*] SolarSCore v1.3 [RELEASE]" << endl << "Server listening at 0.0.0.0:" << port << endl;
+    cout << endl << "SolarSCore v1.4 [RELEASE]" << endl << endl << "[*] Server listening at 0.0.0.0:" << port << endl;
+
+    getipinfo();
+    
+    cout << "[*] PID: " << getpid() << endl;
 
     while (true) {
-        SOCKET client = accept(sock, nullptr, nullptr);
+        int clientSocket = accept(serverSocket, nullptr, nullptr);
 
-        if (client == INVALID_SOCKET) {
+        if (clientSocket == -1) {
             cerr << "[*] Accept failed" << endl;
             continue;
         }
 
         cout << "[*] Connection from " << inet_ntoa(serverAddr.sin_addr) << ":" << ntohs(serverAddr.sin_port) << endl;
 
-        thread th(exec, client);
+        thread th(exec, clientSocket);
         th.detach();
     }
-
-    closesocket(sock);
-    WSACleanup();
-    return 0;
+    close(serverSocket);
+    return EXIT_SUCCESS;
 }
