@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -I. -Wall
+CCFLAGS = -I. -Wall
 
 SRC = main.cpp
 TARGET = core
@@ -24,7 +24,7 @@ DEPS = \
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CC) -o $@ $^ $(CFLAGS) $(DEPS)
+	$(CC) -o $@ $^ $(CCFLAGS) $(DEPS)
 
 clean:
 	rm -f $(TARGET)
