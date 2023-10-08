@@ -3,12 +3,16 @@ C++ server core implemetation for old SC games using ARC4 encryption algorithm
 
 ## Usage
 
-Compilation available on Windows
+Compilation available on Linux
 
 ------
 
-Compile **main.cpp** using ```g++ main.cpp -o main.exe``` (*you should have GNU Compiler Collection which is available via MSYS2*)
+Compile using Makefile -  ```make``` (*you should have GNU Compiler Collection which is available via apt, Pacman, or other Linux package manager*)
 
 ------
 
-Also possible compilation with **VS C++** (*you should have Visual Studio IDE and create solution in it manually*)
+P.S You must implement other packets (like OwnHomeDataMessage) by yourself!
+
+## Contribution
+
+If you got any idea and made fix of the core code - you can start contributing with pull requests!
