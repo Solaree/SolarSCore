@@ -7,7 +7,7 @@ Compilation available on Linux
 
 ------
 
-Compile using Makefile -  ```make``` (*you should have GNU Compiler Collection which is available via apt, Pacman, or other Linux package manager*)
+Compile using Makefile -  ```make``` (*you should have [GNU Compiler Collection](https://gcc.gnu.org) and MAKE, which are available via *apt*, *Pacman*, or other Linux package manager*)
 
 ------
 
