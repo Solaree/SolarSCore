@@ -58,7 +58,7 @@ void getipinfo() {
 
             inet_ntop(AF_INET, &(addr->sin_addr), ipAddr, INET_ADDRSTRLEN);
 
-            if (strncmp(ipAddr, "192.168.", 7) == 0)
+            if (strncmp(ipAddr, "192.", 3) == 0)
                 cout << "[*] Local IP Address: " << ipAddr << endl;
         }
     }
@@ -91,7 +91,7 @@ int32_t main() {
 
     getipinfo();
     
-    cout << "[*] PID: " << getpid() << endl;
+    cout << "[*] PID: " << getpid() << endl << endl;
 
     while (true) {
         int clientSocket = accept(serverSocket, nullptr, nullptr);
