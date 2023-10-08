@@ -1,6 +1,8 @@
 # SolarSCore
 C++ server core implemetation for old SC games using ARC4 encryption algorithm
 
+![Alt text](https://raw.githubusercontent.com/Solaree/SolarSCore/master/pics/img.png)
+
 ## Usage
 
 Compilation available on Linux
