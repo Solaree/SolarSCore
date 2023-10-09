@@ -1,3 +1,18 @@
+/*
+* main.cpp - The SolarSCore
+* Copyright (C) 2023 Solar
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*/
+
 #include <ifaddrs.h>
 
 #include <thread>
@@ -7,8 +22,7 @@
 #include "include/Packets/LogicScrollMessageFactory.hpp"
 
 void exec(int clientSocket) {
-    LogicScrollMessageFactory LogicMessageFactory;
-    LogicMessageFactory.sock = clientSocket;
+    LogicScrollMessageFactory::sock = clientSocket;
 
     while (true) {
         Stream.buffer.resize(7);
@@ -30,10 +44,10 @@ void exec(int clientSocket) {
             cout << "\"" << dec << endl << endl;
 
             if (recv(clientSocket, Stream.buffer.data(), packetLen, 0)) {
-                memcpy(LogicMessageFactory.buffer, Stream.buffer.data(), packetLen);
+                memcpy(LogicScrollMessageFactory::buffer, Stream.buffer.data(), packetLen);
 
-                LogicMessageFactory.createMessageByType(packetId);
-                memset(LogicMessageFactory.buffer, 0, 512);
+                LogicScrollMessageFactory::createMessageByType(packetId);
+                memset(LogicScrollMessageFactory::buffer, 0, 512);
                 Stream.buffer.clear();
             }
         }
@@ -49,7 +63,6 @@ void getipinfo() {
     for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
         if (ifa->ifa_addr == NULL)
             continue;
-
         int family = ifa->ifa_addr->sa_family;
 
         if (family == AF_INET) { // Check for IPv4 address
