@@ -40,4 +40,4 @@ $(TARGET): $(SRC)
 	$(CC) -o $@ $^ $(CCFLAGS) $(DEPS)
 
 clean:
-	rm -f $(TARGET)
+	rm -rf $(TARGET)
