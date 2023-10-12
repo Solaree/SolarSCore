@@ -8,18 +8,17 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 
-CC = g++
-CCFLAGS = -I. -Wall
+CXX = g++
+CXXFLAGS = -m32 -std=gnu++2a -static-libstdc++ -fPIC -I. -Wall -Wno-deprecated-declarations
 
-SRC = main.cpp
-TARGET = core
+SRC = core.cpp
+OUT = core
 
 DEPS = \
-	Core/arc4/arc4.cpp\
-	Core/Crypto.cpp\
+	Core/Crypto.c\
 \
 	Stream/ByteStream.cpp\
 \
@@ -32,12 +31,21 @@ DEPS = \
 	Packets/Server/ServerHelloMessage.cpp\
 	Packets/Server/KeepAliveOkMessage.cpp\
 	Packets/Server/LoginOkMessage.cpp\
-	Packets/Server/LoginFailedMessage.cpp
+	Packets/Server/LoginFailedMessage.cpp\
+	Packets/Server/OwnHomeDataMessage.cpp
 
-all: $(TARGET)
+LIBS = -lcrypto
 
-$(TARGET): $(SRC)
-	$(CC) -o $@ $^ $(CCFLAGS) $(DEPS)
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), MINGW32_NT-10.0) # For Windows using MinGW
+    LIBS += -lws2_32
+endif
+
+all: $(OUT)
+
+$(OUT): $(SRC)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(DEPS) $(LIBS)
 
 clean:
-	rm -rf $(TARGET)
+	rm -rf $(OUT)
