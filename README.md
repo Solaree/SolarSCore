@@ -5,7 +5,7 @@ C++ server core implemetation for old SC games
 
 ## Usage
 
-Multi-platform setup scripts (Arch, Debian, Termux, MSYS2) are in ***/setup/*** directory
+Multi-platform setup scripts (Arch, Debian, Termux, Windows MSYS2) are in ***/setup/*** directory
 
 ------
 
