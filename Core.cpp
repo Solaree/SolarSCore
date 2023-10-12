@@ -1,5 +1,5 @@
 /*
-* core.cpp - The SolarSCore
+* Core.cpp - The SolarSCore
 * Copyright (C) 2023 Solar
 *
 * This program is free software: you can redistribute it and/or modify
