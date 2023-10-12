@@ -14,7 +14,7 @@
 CXX = g++
 CXXFLAGS = -m32 -std=gnu++2a -static-libstdc++ -fPIC -I. -Wall -Wno-deprecated-declarations
 
-SRC = core.cpp
+SRC = Core.cpp
 OUT = core
 
 DEPS = \
