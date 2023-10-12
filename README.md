@@ -1,15 +1,15 @@
 # SolarSCore
-C++ server core implemetation for old SC games using ARC4 encryption algorithm
+C++ server core implemetation for old SC games
 
 ![Alt text](https://raw.githubusercontent.com/Solaree/SolarSCore/master/pics/img.png)
 
 ## Usage
 
-Compilation available on Linux
+Multi-platform scripts are in ***/setup/*** directory
 
 ------
 
-Compile using Makefile -  ```make``` (*you should have [GNU Compiler Collection](https://gcc.gnu.org) and MAKE, which are available via *apt*, *Pacman*, or other Linux package manager*)
+Compile using Makefile -  ```make```
 
 ------
 
