@@ -1,5 +1,5 @@
 # SolarSCore
-C++ server core implemetation for old SC games
+C++ server core implemetation for SC games
 
 ![Alt text](https://raw.githubusercontent.com/Solaree/SolarSCore/master/pics/img.png)
 
@@ -14,6 +14,7 @@ Compile using Makefile -  ```make```
 ------
 
 P.S You must implement other packets (like OwnHomeDataMessage) by yourself!
+You can check what games versions have RC4 and what have Pepper crypto on the [wiki page](https://github.com/Solaree/SolarSCore/wiki)
 
 ## Contribution
 
