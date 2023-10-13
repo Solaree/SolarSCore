@@ -240,7 +240,7 @@ void PepperCrypto__encrypt(
         memcpy(temp + 56, payload, ustrlen(payload));
 
         unsigned char encrypted[16];
-        crypto_secretbox_xsalsa20poly1305(encrypted, temp, 64, Pepper.nonce.nonce, Pepper.shared_encryption_key);
+        crypto_secretbox_xsalsa20poly1305(encrypted, temp, 64, Pepper.nonce.nonce, Pepper.s);
 
         memcpy(payload, encrypted, 16);
     }
@@ -276,8 +276,11 @@ void Crypto__init(
     memcpy(RC4.key, RC4__key, ustrlen(RC4__key));
     memcpy(RC4.nonce, RC4__nonce, ustrlen(RC4__nonce));
 
-    unsigned char PepperCrypto__server_private_key[] = "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+    unsigned char PepperCrypto__server_private_key[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     memcpy(Pepper.server_private_key, PepperCrypto__server_private_key, ustrlen(PepperCrypto__server_private_key));
 
     PepperCrypto__generate_random(); // PepperCrypto__shared_encryption_key
+
+    unsigned char PepperCrypto__s[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    memcpy(Pepper.s, PepperCrypto__s, ustrlen(PepperCrypto__s));
 }
