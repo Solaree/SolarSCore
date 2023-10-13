@@ -16,7 +16,7 @@
 #ifndef BYTESTREAM_HPP
 #define BYTESTREAM_HPP
 
-#ifdef linux
+#ifdef __unix__
     #include <unistd.h>
     #include <arpa/inet.h>
 	#include <sys/socket.h>
@@ -37,56 +37,85 @@
 
 using namespace std;
 
+/* ByteStream Class */
 class ByteStream {
 public:
-	static vector<uint8_t> buffer; /* Main buffer (we switch between dataBuf and headBuf when send packet content) */
-	static vector<uint8_t> headBuf; /* Header buffer */
+	/* Main buffer */
+	static vector<uint8_t> buffer;
+	/* Header buffer */
+	static vector<uint8_t> headBuf;
 
-	static void setBuffer(vector<uint8_t>& buf); /* Sets argument vector to the stream buffer */
+	/* Sets argument vector to the stream buffer */
+	static void setBuffer(vector<uint8_t>& buf);
 
-	void writeUInt8(uint8_t val); /* Writes 1-byte 'uint8' in range from 0 to 255 via 'unsigned char' */
-	uint8_t readUInt8(); /* Reads 1-byte 'uint8' */
+	/* Writes 1-byte 'uint8' in range from 0 to 255 via 'unsigned char' */
+	void writeUInt8(uint8_t val);
+	/* Reads 1-byte 'uint8' */
+	uint8_t readUInt8();
 
-	void writeBool(bool val); /* Writes 1-byte 'bool' with 'uint8' (uses 0 for 'false', 1 for 'true') */
-	bool readBool(); /* Reads 1-byte 'bool' using 'uint8' */
+	/* Writes 1-byte 'bool' with 'uint8' (uses 0 for 'false', 1 for 'true') */
+	void writeBool(bool val);
+	/* Reads 1-byte 'bool' using 'uint8' */
+	bool readBool();
 
-	void writeShort(int16_t val); /* Writes 2-bytes 'short' */
-	int16_t readShort(); /* Reads 2-bytes 'short' */
+	/* Writes 2-bytes 'short' */
+	void writeShort(int16_t val);
+	/* Reads 2-bytes 'short' */
+	int16_t readShort();
 
-	void writeInt(int32_t val); /* Writes 4-bytes 'int' */
-	int32_t readInt(); /* Reads 4-bytes 'int' */
+	/* Writes 4-bytes 'int' */
+	void writeInt(int32_t val);
+	/* Reads 4-bytes 'int' */
+	int32_t readInt();
 
-	void writeLong(int32_t hiByte, int32_t loByte); /* Writes 8-bytes 'long' using 2-times 'int' writing */
-	pair<int32_t, int32_t> readLong(); /* Reads 8-bytes 'long' using 2-times 'int' reading */
+	/* Writes 8-bytes 'long' using 2-times 'int' writing */
+	void writeLong(int32_t hiByte, int32_t loByte);
+	/* Reads 8-bytes 'long' using 2-times 'int' reading */
+	pair<int32_t, int32_t> readLong();
 
-	void writeVInt(int32_t val); /* Writes 7-bits 'vint' (VariableInteger) */
-	int32_t readVInt(); /* Reads 7-bits 'vint' (VariableInteger) */
+	/* Writes 7-bits 'vint' (VariableInteger) */
+	void writeVInt(int32_t val);
+	/* Reads 7-bits 'vint' (VariableInteger) */
+	int32_t readVInt();
 
-	void writeArrayVInt(int32_t* val, int32_t count); /* Writes array of 'vint' (VariableInteger) */
+	/* Writes array of 'vint' (VariableInteger) */
+	void writeArrayVInt(int32_t* val, int32_t count);
 
-	void writeLogicLong(int32_t hiByte, int32_t loByte); /* Writes 14-bits 'long' using 2-times 'vint' writing */
-	pair<int32_t, int32_t> readLogicLong(); /* Reads 14-bits 'long' using 2-times 'vint' writing */
+	/* Writes 14-bits 'long' using 2-times 'vint' writing */
+	void writeLogicLong(int32_t hiByte, int32_t loByte);
+	/* Reads 14-bits 'long' using 2-times 'vint' writing */
+	pair<int32_t, int32_t> readLogicLong();
 
-	void writeBytes(const string& val = ""); /* Writes bytes with 'string' type */
+	/* Writes bytes with 'string' type */
+	void writeBytes(const string& val = "");
 
-	void writeString(const string& s = ""); /* Writes 'string' */
-	string readString(); /* Reads 'string' */
+	/* Writes 'string' */
+	void writeString(const string& s = "");
+	/* Reads 'string' */
+	string readString();
 
-	void writeStringRef(const string& s = ""); /* Writes 'stringref' (StringReferance) */
+	/* Writes 'stringref' (StringReferance) */
+	void writeStringRef(const string& s = "");
 
-	void writeHex(const string& hexa = ""); /* Writes raw hex data */
+	/* Writes raw hex data */
+	void writeHex(const string& hexa = "");
 
-	vector<uint8_t> hexStringToBytes(const string& hexStr); /* Util used for 'writeHex() function */
+	/* Util used for 'writeHex()' function */
+	vector<uint8_t> hexStringToBytes(const string& hexStr);
 
-	void writePacket(const uint16_t id, int32_t sock, uint16_t ver = 0); /* Writes encrypted packet to buffer */
+	/* Writes encrypted packet to the buffer and sends it */
+	void writePacket(const uint16_t id, int32_t sock, uint16_t ver = 0);
 
 private:
 	template<typename Temp>
-	Temp readInteger(size_t length); /* Generic function to read an integer of specified length from the buffer */
+	/* Generic function to read an integer of specified length from the buffer */
+	Temp readInteger(size_t length);
 
+	/* Generic function to write data to the buffer */
 	template<typename Temp>
 	void writeData(const Temp& data);
-}; /* ByteStream Class */
-extern ByteStream Stream; // ByteStream Init
+};
+// ByteStream Init
+extern ByteStream Stream;
 
 #endif // !BYTESTREAM_HPP

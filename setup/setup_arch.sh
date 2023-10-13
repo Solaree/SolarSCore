@@ -21,7 +21,7 @@ sudo sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
 sudo pacman -Syu --noconfirm
 
 # Install requirements for multilib
-sudo pacman -S --noconfirm --needed base-devel multilib-devel lib32-openssl
+sudo pacman -S --noconfirm --needed base-devel multilib-devel lib32-libsodium
 
 # Clear terminal session
 clear

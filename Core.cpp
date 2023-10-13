@@ -13,7 +13,7 @@
 * GNU General Public License for more details.
 */
 
-#ifdef linux
+#ifdef __unix__
     #include <ifaddrs.h>
 #elif defined(_WIN32)
     #include <winsock2.h>
@@ -24,7 +24,7 @@
 #include "include/Packets/LogicScrollMessageFactory.hpp"
 
 void getipinfo() {
-#ifdef linux
+#ifdef __unix__
     struct ifaddrs *ifaddr, *ifa;
 
     getifaddrs(&ifaddr);
@@ -102,6 +102,8 @@ void getipinfo() {
 void clientThread(int32_t clientsock, sockaddr_in clientaddr) {
     LogicScrollMessageFactory::sock = clientsock;
 
+    // Crypto__init();
+
     while (true) {
         unsigned char headerBuf[7];
 
@@ -118,9 +120,11 @@ void clientThread(int32_t clientsock, sockaddr_in clientaddr) {
         unsigned char packetBuf[packetLen];
     
         recv(clientsock, packetBuf, packetLen, 0);
-        // RC4__encrypt(packetBuf);
+        // RC4__encrypt(packetBuf, packetBuf);
 
         vector<uint8_t> packetData(packetBuf, packetBuf + packetLen);
+
+        // PepperCrypto__decrypt(packetId, packetData.data());
 
         cout << "[*] Got packet with Id: " << packetId << " || Length: " << packetLen
             << " || Version: " << packetVer << " || Content: ";
@@ -150,7 +154,7 @@ int serverThread() {
 #endif
 
     int32_t sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&sockopt), sizeof(int32_t));
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)(&sockopt), sizeof(int32_t));
 
     sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
@@ -174,7 +178,7 @@ int serverThread() {
         return EXIT_FAILURE;
     }
 
-    cout << endl << "SolarSCore v1.5 [RELEASE]" << endl << endl << "[*] Server listening at 0.0.0.0:" << port << endl;
+    cout << endl << "SolarSCore v1.6 [RELEASE]" << endl << endl << "[*] Server listening at 0.0.0.0:" << port << endl;
 
     getipinfo();
     

@@ -21,7 +21,7 @@ sudo dpkg --add-architecture i386
 sudo apt update -y && sudo apt upgrade -y
 
 # Install requirements
-sudo apt install -y make build-essential g++-multilib libssl-dev:i386
+sudo apt install -y make build-essential g++-multilib libsodium-dev:i386
 
 # Clear terminal session
 clear

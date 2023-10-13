@@ -18,7 +18,7 @@
 pacman -Syu --noconfirm
 
 # Install requirements
-pacman -S --noconfirm make mingw-w64-i686-toolchain mingw-w64-i686-openssl
+pacman -S --noconfirm make mingw-w64-i686-toolchain mingw-w64-i686-libsodium
 
 # Clear terminal session
 clear

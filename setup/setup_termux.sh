@@ -18,7 +18,7 @@
 pkg update -y && pkg upgrade -y
 
 # Install requirements
-pkg install -y make build-essential libllvm openssl
+pkg install -y make build-essential libllvm libsodium
 
 # Clear terminal session
 clear
