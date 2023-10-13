@@ -11,41 +11,51 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 
+CC = gcc
+CCFLAGS = -m32 -std=gnu17 -fPIC -I. -Wall -Wno-deprecated-declarations
 CXX = g++
-CXXFLAGS = -m32 -std=gnu++2a -static-libstdc++ -fPIC -I. -Wall -Wno-deprecated-declarations
+CXXFLAGS = -m32 -std=gnu++2b -static-libstdc++ -fPIC -I. -Wall -Wno-deprecated-declarations
 
-SRC = Core.cpp
+LIBS = -lsodium
+
+SRC_C = \
+    include/Core/blake2b/blake2b.c \
+    include/Core/blake2b/memzero.c \
+    include/Core/tweetnacl/tweetnacl.c \
+    Core/Crypto.c
+
+SRC_CPP = \
+    Core.cpp \
+    Stream/ByteStream.cpp \
+    Packets/LogicScrollMessageFactory.cpp \
+    Packets/Client/ClientHelloMessage.cpp \
+    Packets/Client/LoginMessage.cpp \
+    Packets/Client/KeepAliveMessage.cpp \
+    Packets/Server/ServerHelloMessage.cpp \
+    Packets/Server/LoginOkMessage.cpp \
+    Packets/Server/LoginFailedMessage.cpp \
+    Packets/Server/KeepAliveOkMessage.cpp \
+    Packets/Server/OwnHomeDataMessage.cpp
+
+OBJ_C = $(SRC_C:.c=.o)
+OBJ_CPP = $(SRC_CPP:.cpp=.o)
+
 OUT = core
-
-DEPS = \
-	Core/Crypto.c\
-\
-	Stream/ByteStream.cpp\
-\
-	Packets/LogicScrollMessageFactory.cpp\
-\
-	Packets/Client/ClientHelloMessage.cpp\
-	Packets/Client/KeepAliveMessage.cpp\
-	Packets/Client/LoginMessage.cpp\
-\
-	Packets/Server/ServerHelloMessage.cpp\
-	Packets/Server/KeepAliveOkMessage.cpp\
-	Packets/Server/LoginOkMessage.cpp\
-	Packets/Server/LoginFailedMessage.cpp\
-	Packets/Server/OwnHomeDataMessage.cpp
-
-LIBS = -lcrypto
 
 UNAME := $(shell uname)
 
-ifeq ($(UNAME), MINGW32_NT-10.0) # For Windows using MinGW
+ifeq ($(UNAME), MINGW32_NT-10.0) # For MinGW
     LIBS += -lws2_32
 endif
 
-all: $(OUT)
-
-$(OUT): $(SRC)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(DEPS) $(LIBS)
-
+all: $(OUT) clean_bin
+$(OUT): $(OBJ_C) $(OBJ_CPP)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
+%.o: %.c
+	$(CC) -c -o $@ $< $(CCFLAGS)
+%.o: %.cpp
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
+clean_bin:
+	rm -rf $(OBJ_C) $(OBJ_CPP)
 clean:
-	rm -rf $(OUT)
+	rm -rf $(OUT) $(OBJ_C) $(OBJ_CPP)
