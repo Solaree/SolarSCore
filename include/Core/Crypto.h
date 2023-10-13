@@ -57,7 +57,8 @@ typedef struct
     unsigned char nonce[24];
 } Nonce;
 
-typedef struct {
+typedef struct
+{
     unsigned char server_public_key[32];
     unsigned char server_private_key[32];
     unsigned char client_public_key[32];
