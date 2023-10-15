@@ -1,5 +1,5 @@
 # SolarSCore
-C++ server core implemetation for SC games
+C++ server core implemetation for Supercell games
 
 ![Alt text](https://raw.githubusercontent.com/Solaree/SolarSCore/master/pics/img.png)
 
