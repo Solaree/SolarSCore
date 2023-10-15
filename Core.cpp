@@ -102,8 +102,6 @@ void getipinfo() {
 void clientThread(int32_t clientsock, sockaddr_in clientaddr) {
     LogicScrollMessageFactory::sock = clientsock;
 
-    // Crypto__init();
-
     while (true) {
         unsigned char headerBuf[7];
 
@@ -124,7 +122,7 @@ void clientThread(int32_t clientsock, sockaddr_in clientaddr) {
 
         vector<uint8_t> packetData(packetBuf, packetBuf + packetLen);
 
-        // PepperCrypto__decrypt(packetId, packetData.data());
+        // PepperCrypto__decrypt(packetId, packetData.data(), packetLen);
 
         cout << "[*] Got packet with Id: " << packetId << " || Length: " << packetLen
             << " || Version: " << packetVer << " || Content: ";
@@ -140,7 +138,7 @@ void clientThread(int32_t clientsock, sockaddr_in clientaddr) {
     }
 }
 
-int serverThread() {
+void serverThread() {
     int32_t sockopt = 1;
     int32_t port = 9339;
 
@@ -149,7 +147,7 @@ int serverThread() {
 
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         cerr << "[*] Failed to initialize Winsock" << endl;
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
 #endif
 
@@ -167,7 +165,7 @@ int serverThread() {
 #ifdef _WIN32
         WSACleanup();
 #endif
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
 
     if (listen(sockfd, 1) == -1) {
@@ -175,7 +173,7 @@ int serverThread() {
 #ifdef _WIN32
         WSACleanup();
 #endif
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
 
     cout << endl << "SolarSCore v1.6 [RELEASE]" << endl << endl << "[*] Server listening at 0.0.0.0:" << port << endl;
@@ -203,7 +201,6 @@ int serverThread() {
 #ifdef _WIN32
     WSACleanup();
 #endif
-    return EXIT_SUCCESS;
 }
 
 int main() {
