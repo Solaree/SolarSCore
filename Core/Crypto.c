@@ -29,78 +29,18 @@
 #include "include/Core/Crypto.h"
 
 ARC4 RC4;
-PepperKey Pepper;
+PepperInit Pepper;
 
-size_t ustrlen(
-    const unsigned char *data
-)
-{
-    size_t length = 0;
-    while (data[length] != '\0')
-    {
-        ++length;
-    }
-    return length;
-}
-
-void urandom(
-    unsigned char *buf,
-    size_t size
-)
-{
-#ifdef __linux__    /* We dont use '__unix__',
-                        because function uses only Linux kerenel device system */
-    int32_t randomData = open("/dev/urandom", O_RDONLY);
-
-    if (randomData < 0)
-    {
-        perror("[!] Failed to open /dev/urandom");
-        exit(EXIT_FAILURE);
-    }
-
-    ssize_t result = read(randomData, buf, size);
-
-    if (result < 0)
-    {
-        perror("[!] Failed to read from /dev/urandom");
-        close(randomData);
-        exit(EXIT_FAILURE);
-    }
-    close(randomData);
-#elif defined(_WIN32)
-    HCRYPTPROV hCryptProv;
-    if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
-    {
-        fprintf(stderr, "[!] Failed to acquire cryptograhic context\n");
-        exit(EXIT_FAILURE);
-    }
-
-    if (!CryptGenRandom(hCryptProv, (DWORD)size, buf))
-    {
-        fprintf(stderr, "[!] Failed to generate random data\n");
-        CryptReleaseContext(hCryptProv, 0);
-        exit(EXIT_FAILURE);
-    }
-
-    CryptReleaseContext(hCryptProv, 0);
-#endif
-}
-
-void RC4__swap(
-    unsigned char *a,
-    unsigned char *b
-)
+void RC4__swap(unsigned char *a, unsigned char *b)
 {
     int32_t tmp = *a;
     *a = *b;
     *b = tmp;
 }
 
-int32_t RC4__KSA(
-    unsigned char *S
-) 
+int32_t RC4__KSA(unsigned char *S)
 {
-    int32_t len = ustrlen(RC4.key);
+    int32_t len = strlen((const char*)RC4.key);
     int32_t j = 0;
 
     for (int32_t i = 0; i < N; i++)
@@ -114,16 +54,12 @@ int32_t RC4__KSA(
     return EXIT_SUCCESS;
 }
 
-int32_t RC4__PRGA(
-    unsigned char *S,
-    unsigned char *plaintext,
-    unsigned char *ciphertext
-)
+int32_t RC4__PRGA(unsigned char *S, unsigned char *plaintext, unsigned char *ciphertext)
 {
     int32_t i = 0;
     int32_t j = 0;
 
-    for (size_t n = 0, len = ustrlen(plaintext); n < len; n++)
+    for (size_t n = 0, len = strlen((const char*)plaintext); n < len; n++)
     {
         i = (i + 1) % N;
         j = (j + S[i]) % N;
@@ -136,10 +72,7 @@ int32_t RC4__PRGA(
     return EXIT_SUCCESS;
 }
 
-int32_t RC4__encrypt(
-    unsigned char *plaintext,
-    unsigned char *ciphertext
-)
+int32_t RC4__encrypt(unsigned char *plaintext, unsigned char *ciphertext)
 {
     unsigned char S[N];
 
@@ -148,139 +81,154 @@ int32_t RC4__encrypt(
     return EXIT_SUCCESS;
 }
 
-void Nonce__init(
-    unsigned char *clientKey,
-    unsigned char *serverKey
-)
+void Nonce__init(unsigned char nonce[24], unsigned char *client_pk, unsigned char *server_pk)
 {
-    if (!clientKey)
+    if (client_pk == NULL)
     {
-        if (!&Pepper.nonce )
-            urandom(Pepper.nonce.nonce, 24);
+        randombytes(nonce, crypto_box_NONCEBYTES);
     }
     else
     {
-        blake2b_state hash;
+        crypto_generichash_blake2b_state hash;
 
-        blake2b_Init(&hash, 24);
+        crypto_generichash_blake2b_init(&hash, NULL, 0, 24);
 
-        if (&Pepper.nonce)
-            blake2b_Update(&hash, Pepper.nonce.nonce, 24);
-        blake2b_Update(&hash, clientKey, ustrlen(clientKey));
-        blake2b_Update(&hash, serverKey, ustrlen(serverKey));
+        if (nonce != NULL)
+            crypto_generichash_blake2b_update(&hash, nonce, 24);
+        crypto_generichash_blake2b_update(&hash, client_pk, 32);
+        crypto_generichash_blake2b_update(&hash, server_pk, 32);
 
-        blake2b_Final(&hash, Pepper.nonce.nonce, 24);
+        crypto_generichash_blake2b_final(&hash, nonce, 24);
     }
 }
 
-void Nonce__increment(
-
-) 
+void Nonce__increment(unsigned char nonce[24])
 {
-    uint64_t *value = (uint64_t*)Pepper.nonce.nonce;
-    *value += 2;
+    uint64_t nonceVal = 0;
+
+    for (size_t i = 0; i < 24; ++i)
+        nonceVal |= ((uint64_t)nonce[i]) << (8 * i);
+
+    nonceVal += 2;
+
+    for (size_t i = 0; i < 24; ++i) {
+        nonce[i] = (uint8_t)(nonceVal & 0xFF);
+        nonceVal >>= 8;
+    }
 }
 
-void PepperCrypto__decrypt(
-    const int16_t id,
-    unsigned char *payload
-)
+void PepperCrypto__decrypt(const int16_t id, unsigned char *payload, uint32_t payloadLen)
 {
-    size_t payloadlen = ustrlen(payload);
-
     if (id == 10101 && id != 10100)
     {
         memcpy(Pepper.client_public_key, payload, 32);
         payload += 32;
-        payloadlen -= 32;
+        payloadLen -= 32;
 
-        crypto_scalarmult_curve25519_tweet_base(Pepper.server_public_key, Pepper.server_private_key);
+        if (crypto_scalarmult_curve25519_base(Pepper.server_public_key, Pepper.server_private_key) == EXIT_SUCCESS) {
+            unsigned char nonce[24];
+            Nonce__init(nonce, Pepper.client_public_key, Pepper.server_public_key);
 
-        Nonce__init(Pepper.client_public_key, Pepper.server_public_key);
+            if (crypto_box_curve25519xsalsa20poly1305_beforenm(Pepper.s, Pepper.client_public_key, Pepper.server_private_key) == EXIT_SUCCESS) {
+                unsigned char temp_payload[payloadLen + 16];
 
-        crypto_box_curve25519xsalsa20poly1305_tweet_beforenm(Pepper.s, Pepper.client_public_key, Pepper.server_private_key);
+                memset(temp_payload, 0, 16);
+                memcpy(temp_payload + 16, payload, payloadLen);
 
-        uint8_t temp[56];
-        memcpy(temp, Pepper.encryptNonce.nonce, 24);
-        memcpy(temp + 24, payload, payloadlen);
-        
-        uint8_t decrypted[56];
-        crypto_secretbox_xsalsa20poly1305_tweet_open(decrypted, temp, 56, Pepper.encryptNonce.nonce, Pepper.s);
-        
-        memcpy(Pepper.decryptNonce.nonce, decrypted + 24, 24);
+                unsigned char decrypted[sizeof(temp_payload)];
+
+                if (crypto_secretbox_xsalsa20poly1305_open(decrypted, temp_payload, sizeof(temp_payload), nonce, Pepper.s) == EXIT_SUCCESS) {;
+                    unsigned char *decrypted_ptr = decrypted + 32;
+
+                    memcpy(Pepper.decryptNonce, decrypted_ptr + 24, 24);
+                    Nonce__init(Pepper.decryptNonce, NULL, NULL);
+
+                    payload = decrypted_ptr + 48;
+                }
+            }
+        };
     }
-    else if (&Pepper.decryptNonce)
+    else if (Pepper.decryptNonce == NULL)
     {
-        Nonce__increment();
+        payload = payload;
+    }
+    else
+    {
+        Nonce__increment(Pepper.decryptNonce);
 
-        uint8_t temp[56];
-        memcpy(temp, Pepper.decryptNonce.nonce, 24);
-        memcpy(temp + 24, payload, payloadlen);
-        
-        uint8_t decrypted[56];
-        crypto_secretbox_xsalsa20poly1305_tweet_open(decrypted, temp, 56, Pepper.decryptNonce.nonce, Pepper.shared_encryption_key);
+        unsigned char temp_payload[payloadLen + 16];
 
-        memcpy(payload, decrypted, payloadlen);
+        memset(temp_payload, 0, 16);
+        memcpy(temp_payload + 16, payload, payloadLen);
+
+        unsigned char decrypted[sizeof(temp_payload)];
+
+        if (crypto_secretbox_xsalsa20poly1305_open(decrypted, temp_payload, sizeof(temp_payload), Pepper.decryptNonce, Pepper.shared_encryption_key) == 0)
+            memcpy(payload, decrypted + 32, sizeof(decrypted) - 32);
     }
 }
 
-void PepperCrypto__encrypt(
-    const int16_t id,
-    unsigned char *payload
-)
+void PepperCrypto__encrypt(const int16_t id, unsigned char *payload, uint32_t payloadLen)
 {
     if (id == 20104 && id != 20100 && id != 20103)
     {
-        Nonce__init(0, 0);
-        Nonce__increment();
+        Nonce__init(Pepper.decryptNonce, Pepper.client_public_key, Pepper.server_public_key);
 
-        unsigned char temp[64];
-        memcpy(temp, Pepper.nonce.nonce, 24);
-        memcpy(temp + 24, Pepper.shared_encryption_key, 32);
-        memcpy(temp + 56, payload, ustrlen(payload));
+        unsigned char temp_payload[payloadLen + 56];
 
-        unsigned char encrypted[16];
-        crypto_secretbox_xsalsa20poly1305(encrypted, temp, 64, Pepper.nonce.nonce, Pepper.s);
+        memcpy(temp_payload, Pepper.encryptNonce, 24);
+        memcpy(temp_payload + 24, Pepper.shared_encryption_key, 32);
+        memcpy(temp_payload + 56, payload, payloadLen);
 
-        memcpy(payload, encrypted, 16);
+        unsigned char padded_payload[sizeof(temp_payload) + 32];
+
+        memset(padded_payload, 0, 32);
+        memcpy(padded_payload + 32, temp_payload, sizeof(temp_payload));
+
+        unsigned char encrypted[sizeof(padded_payload)];
+
+        if (crypto_secretbox_xsalsa20poly1305(encrypted, padded_payload, sizeof(padded_payload), Pepper.decryptNonce, Pepper.s))
+            memcpy(payload, encrypted + 16, sizeof(encrypted) - 16);
     }
     else if (id != 20100 && id != 20103)
     {
-        Nonce__increment();
+        Nonce__increment(Pepper.encryptNonce);
 
-        unsigned char temp[56];
-        memcpy(temp, Pepper.nonce.nonce, 24);
-        memcpy(temp + 24, payload, ustrlen(payload));
+        unsigned char padded_payload[payloadLen + 32];
+        memset(padded_payload, 0, 32);
+        memcpy(padded_payload + 32, payload, payloadLen);
 
-        unsigned char encrypted[16];
-        crypto_secretbox_xsalsa20poly1305(encrypted, temp, 56, Pepper.nonce.nonce, Pepper.shared_encryption_key);
+        unsigned char encrypted[sizeof(padded_payload)];
 
-        memcpy(payload, encrypted, 16);
+        if (crypto_secretbox_xsalsa20poly1305(encrypted, padded_payload, sizeof(padded_payload), Pepper.nonce, Pepper.shared_encryption_key))
+            memcpy(payload, encrypted + 16, sizeof(encrypted) - 16);
     }
 }
 
-void PepperCrypto__generate_random(
-
-)
+void PepperCrypto__generate_random()
 {
-    urandom(Pepper.shared_encryption_key, 32);
+    randombytes(Pepper.shared_encryption_key, 32);
 }
 
-void Crypto__init(
+void RC4__init() {
+    unsigned char RC4__key[38] = "fhsd6f86f67rt8fw78fw789we78r9789wer6re";
+    unsigned char RC4__nonce[5] = "nonce";
 
-)
+    memcpy(RC4.key, RC4__key, sizeof(RC4__key));
+    memcpy(RC4.nonce, RC4__nonce, sizeof(RC4__nonce));
+}
+
+void PepperCrypto__init()
 {
-    unsigned char RC4__key[] = "fhsd6f86f67rt8fw78fw789we78r9789wer6re";
-    unsigned char RC4__nonce[] = "nonce";
-
-    memcpy(RC4.key, RC4__key, ustrlen(RC4__key));
-    memcpy(RC4.nonce, RC4__nonce, ustrlen(RC4__nonce));
-
-    unsigned char PepperCrypto__server_private_key[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    memcpy(Pepper.server_private_key, PepperCrypto__server_private_key, ustrlen(PepperCrypto__server_private_key));
+    unsigned char PepperCrypto__server_private_key[32] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    memcpy(Pepper.server_private_key, PepperCrypto__server_private_key, 32);
 
     PepperCrypto__generate_random(); // PepperCrypto__shared_encryption_key
 
-    unsigned char PepperCrypto__s[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    memcpy(Pepper.s, PepperCrypto__s, ustrlen(PepperCrypto__s));
+    Nonce__init(Pepper.encryptNonce, NULL, NULL);
+
+    Pepper.decryptNonce = NULL;
+
+    unsigned char PepperCrypto__s[32] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    memcpy(Pepper.s, PepperCrypto__s, 32);
 }
