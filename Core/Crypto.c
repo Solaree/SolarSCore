@@ -118,11 +118,11 @@ void PepperCrypto__decrypt(const int16_t id, unsigned char *payload, uint32_t pa
         payload += 32;
         payloadLen -= 32;
 
-        if (crypto_scalarmult_curve25519_base(Pepper.server_public_key, Pepper.server_private_key) == EXIT_SUCCESS) {
+        if (crypto_scalarmult_curve25519_base(Pepper.server_public_key, Pepper.server_private_key)) {
             unsigned char nonce[24];
             Nonce__init(nonce, Pepper.client_public_key, Pepper.server_public_key);
 
-            if (crypto_box_curve25519xsalsa20poly1305_beforenm(Pepper.s, Pepper.client_public_key, Pepper.server_private_key) == EXIT_SUCCESS) {
+            if (crypto_box_curve25519xsalsa20poly1305_beforenm(Pepper.s, Pepper.client_public_key, Pepper.server_private_key)) {
                 unsigned char temp_payload[payloadLen + 16];
 
                 memset(temp_payload, 0, 16);
@@ -130,7 +130,7 @@ void PepperCrypto__decrypt(const int16_t id, unsigned char *payload, uint32_t pa
 
                 unsigned char decrypted[sizeof(temp_payload)];
 
-                if (crypto_secretbox_xsalsa20poly1305_open(decrypted, temp_payload, sizeof(temp_payload), nonce, Pepper.s) == EXIT_SUCCESS) {;
+                if (crypto_secretbox_xsalsa20poly1305_open(decrypted, temp_payload, sizeof(temp_payload), nonce, Pepper.s)) {;
                     unsigned char *decrypted_ptr = decrypted + 32;
 
                     memcpy(Pepper.decryptNonce, decrypted_ptr + 24, 24);
@@ -156,7 +156,7 @@ void PepperCrypto__decrypt(const int16_t id, unsigned char *payload, uint32_t pa
 
         unsigned char decrypted[sizeof(temp_payload)];
 
-        if (crypto_secretbox_xsalsa20poly1305_open(decrypted, temp_payload, sizeof(temp_payload), Pepper.decryptNonce, Pepper.shared_encryption_key) == 0)
+        if (crypto_secretbox_xsalsa20poly1305_open(decrypted, temp_payload, sizeof(temp_payload), Pepper.decryptNonce, Pepper.shared_encryption_key))
             memcpy(payload, decrypted + 32, sizeof(decrypted) - 32);
     }
 }
