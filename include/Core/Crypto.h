@@ -40,8 +40,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "include/Core/blake2b/blake2b.h"
-#include "include/Core/tweetnacl/tweetnacl.h"
+#include <sodium.h>
 
 #define N 256 // 2^8
 
@@ -54,85 +53,47 @@ extern ARC4 RC4;
 
 typedef struct
 {
-    unsigned char nonce[24];
-} Nonce;
-
-typedef struct
-{
-    unsigned char server_public_key[32];
-    unsigned char server_private_key[32];
-    unsigned char client_public_key[32];
+    unsigned char     server_public_key[32];
+    unsigned char    server_private_key[32];
+    unsigned char     client_public_key[32];
     unsigned char shared_encryption_key[32];
 
-    Nonce nonce;
-    Nonce decryptNonce;
-    Nonce encryptNonce;
+    unsigned char nonce[24];
+
+    unsigned char *encryptNonce;
+    unsigned char *decryptNonce;
 
     unsigned char s[32];
-} PepperKey;
-extern PepperKey Pepper;
-
-/* Unsigned char pointer lenght util */
-size_t ustrlen(
-    const unsigned char *data
-);
-
-/* Generation of random bytes via Linux kernel urandom device */
-void urandom(
-    unsigned char *buf,
-    size_t size
-);
+} PepperInit;
+extern PepperInit Pepper;
 
 /* ARC4 Swap */
-void RC4__swap(
-    unsigned char *a,
-    unsigned char *b
-);
+void RC4__swap(unsigned char *a, unsigned char *b);
 
 /* ARC4 KSA */
-int32_t RC4__KSA(
-    unsigned char *S
-);
+int32_t RC4__KSA(unsigned char *S);
 
 /* ARC4 PRGA */
-int32_t RC4__PRGA(
-    unsigned char *S,
-    unsigned char *plaintext,
-    unsigned char *ciphertext
-);
+int32_t RC4__PRGA(unsigned char *S, unsigned char *plaintext, unsigned char *ciphertext);
 
 /* ARC4 encryption/decryption implementation */
-int32_t RC4__encrypt(
-    unsigned char *plaintext,
-    unsigned char *ciphertext
-);
+int32_t RC4__encrypt(unsigned char *plaintext, unsigned char *ciphertext);
 
 /* Blake2b Nonce Init */
-void Nonce__init(
-    unsigned char *clientKey,
-    unsigned char *serverKey
-);
+void Nonce__init(unsigned char nonce[24], unsigned char *client_pk, unsigned char *server_pk);
 
 /* Blake2b Nonce increment */
-void Nonce__increment(
-
-);
+void Nonce__increment(unsigned char nonce[24]);
 
 /* Pepper Decryption implementation */
-void PepperCrypto__decrypt(
-    const int16_t id,
-    unsigned char *payload
-);
+void PepperCrypto__decrypt(const int16_t id, unsigned char *payload, uint32_t payloadLen);
 
 /* Pepper Encryption implementation */
-void PepperCrypto__encrypt(
-    const int16_t id,
-    unsigned char *payload
-);
+void PepperCrypto__encrypt(const int16_t id, unsigned char *payload, uint32_t payloadLen);
 
-/* Crypto initialization */
-void Crypto__init(
-
-);
+/* RC4 Crypto initialization */
+void RC4__init();
+/* PepperCrypto initialization */
+void PepperCrypto__init();
 
 #endif // !CRYPTO_H
