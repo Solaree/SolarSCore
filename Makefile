@@ -19,9 +19,6 @@ CXXFLAGS = -m32 -std=gnu++2b -static-libstdc++ -fPIC -I. -Wall -Wno-deprecated-d
 LIBS = -lsodium
 
 SRC_C = \
-    include/Core/blake2b/blake2b.c \
-    include/Core/blake2b/memzero.c \
-    include/Core/tweetnacl/tweetnacl.c \
     Core/Crypto.c
 
 SRC_CPP = \
