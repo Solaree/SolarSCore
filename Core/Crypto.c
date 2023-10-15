@@ -12,15 +12,8 @@
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 * GNU General Public License for more details.
 *
-* BLAKE2B — Fast secure hashing.
-* Copyright (C) 2012, Samuel Neves
-*
-* All the 'BLAKE2B' code is triple-licensed under the CC0, the OpenSSL Licence,
-* or the Apache Public License 2.0, at your choosing
-*
-* TweetNaCl - A crypto library in 100 tweets
-* Copyright (C) 2017 D. J. Bernstein, Bernard van Gastel, W. Janssen,
-* T. Lange, P. Schwabe, S. Smetsers
+* Libsodium - A modern, portable, easy to use crypto library.
+* Copyright (C) 2023 Frank Denis. Under ISC License.
 *
 * Special thanks to Risporce for his BSDS Crypto implementation
 * via Python: https://github.com/risporce/BSDS/blob/main/Classes/Crypto.py
