@@ -239,9 +239,12 @@ void ByteStream::writeData(const Temp& data) {
     }
 }
 
-void ByteStream::writePacket(const uint16_t id, int32_t sock, uint16_t ver /* = 0 */) {
-    // RC4__encrypt(buffer.data());
-	// PepperCrypto__encrypt(id, buffer.data());
+void ByteStream::writePacket(const uint16_t id, int32_t sock, uint16_t ver) {
+    // RC4__init();
+    // PepperCrypto__init();
+
+    // RC4__encrypt(buffer.data(), buffer.data());
+	// PepperCrypto__encrypt(id, buffer.data(), buffer.size());
 
     // Prepare the header
     headBuf.push_back((uint8_t)((id >> 8) & 255)); 				// Header ID (bits 8-15)
