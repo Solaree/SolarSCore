@@ -160,8 +160,12 @@ void ByteStream::writeBytes(const string& val) {
 }
 
 void ByteStream::writeString(const string& s) {
-    writeData<int32_t>(s.size());
-    buffer.insert(buffer.end(), s.begin(), s.end());
+	if (s.empty()) {
+		writeInt(-1);
+	} else {
+    	writeInt(s.length());
+    	writeBytes(s.data());
+	}
 }
 
 string ByteStream::readString() {
@@ -179,7 +183,7 @@ void ByteStream::writeStringRef(const string& s) {
 	if (s.empty()) {
 		writeInt(-1);
 	} else {
-		writeLong(2, 0);
+		writeShort(0);
 		writeVInt(s.length());
 		writeBytes(s.data());
 	}
